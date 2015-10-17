@@ -1,7 +1,24 @@
 #!/usr/bin/python
 
 from distutils.core import Command, setup
+from distutils.extension import Extension
 import unittest
+
+try:
+    import Cython
+    USE_CYTHON = True
+except ImportError:
+    USE_CYTHON = False
+
+ext = '.pyx' if USE_CYTHON else '.c'
+
+extensions = [Extension("main", ["unidecode/main" + ext])]
+
+
+if USE_CYTHON:
+    from Cython.Build import cythonize
+    extensions = cythonize(extensions)
+
 
 UNITTESTS = [
     "tests",
@@ -58,5 +75,6 @@ Sean M. Burke <sburke@cpan.org>.
       provides = [ 'unidecode' ],
 
       cmdclass = { 'test': TestCommand },
-      url = 'https://github.com/iki/unidecode/'
+      url = 'https://github.com/iki/unidecode/',
+      ext_modules = extensions,
 )
