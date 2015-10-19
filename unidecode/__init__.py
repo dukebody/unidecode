@@ -13,9 +13,31 @@ In Python 3, a standard string object will be returned. If you need bytes, use:
 >>> unidecode("Κνωσός").encode("ascii")
 b'Knosos'
 """
+import codecs
+import sys
+
 Cache = {}
 
+PY3 = (sys.version_info.major == 3)
+unicode_type = str if PY3 else unicode
+
+
+def handle_unidecode(exception):
+    substr = exception.object[exception.start:exception.end]
+    return (unicode_type(_unidecode(substr)), exception.end)
+
+codecs.register_error('unidecode', handle_unidecode)
+
+
 def unidecode(string):
+    encoded = string.encode("ASCII", "unidecode")
+    if PY3:
+        return encoded.decode("ASCII")
+    else:
+        return encoded
+
+
+def _unidecode(string):
     """Transliterate an Unicode object into an ASCII string
 
     >>> unidecode(u"\u5317\u4EB0")
